@@ -5,7 +5,7 @@ Minimalistic Async code around Async E131 for ESP8266/ESP32
 - WiFiManager Captive Portal to get WiFi credentials (Compile with `-DUSE_EADNS`)
 - Subscribes to E131 multicast
 - Connect RX/GPIO3 to DIN of NeoPixel strip
-- Upload new firmware at http://<IP_ADDRESS>/update
+- Upload included [new firmware](https://github.com/debsahu/E131_PixelPusher/raw/master/Arduino/dist/firmware.bin) at http://<IP_ADDRESS>/update
 
 
 [![E131_PixelPusher](https://img.youtube.com/vi/xxxxxxxxx/0.jpg)](https://www.youtube.com/watch?v=xxxxxxxxx)
