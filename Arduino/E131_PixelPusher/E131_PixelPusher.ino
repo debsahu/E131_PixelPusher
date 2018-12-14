@@ -19,7 +19,7 @@
 #define HTTP_PORT 80
 
 #define UNIVERSE 1                    // First DMX Universe to listen for
-#define UNIVERSE_COUNT 10             // Total number of Universes to listen for, starting at UNIVERSE
+#define UNIVERSE_COUNT 2              // Total number of Universes to listen for, starting at UNIVERSE max 7 for multicast and 12 for unicast
 #define ledCount 170 * UNIVERSE_COUNT // 170 LEDs per Universe
 
 // ESPAsyncE131 instance with UNIVERSE_COUNT buffer slots
@@ -31,7 +31,7 @@ AsyncDNSServer dns;
 NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> strip(ledCount);
 NeoGamma<NeoGammaTableMethod> colorGamma;
 
-char update_html[] PROGMEM = R"=====(<!DOCTYPE html><html lang="en"><head><title>Firware Update</title><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width"><link rel="shortcut icon" type="image/x-icon" href="favicon.ico"></head><body><h3>Update Firmware</h3><br><form method="POST" action="/update" enctype="multipart/form-data"><input type="file" name="update"> <input type="submit" value="Update"></form></body></html>)=====";
+char update_html[] PROGMEM = R"=====(<!DOCTYPE html><html lang="en"><head><title>Firmware Update</title><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width"><link rel="shortcut icon" type="image/x-icon" href="favicon.ico"></head><body><h3>Update Firmware</h3><br><form method="POST" action="/update" enctype="multipart/form-data"><input type="file" name="update"> <input type="submit" value="Update"></form></body></html>)=====";
 
 RgbColor GammaColor(uint8_t red, uint8_t green, uint8_t blue)
 {
@@ -129,8 +129,7 @@ void loop()
         uint16_t universe = htons(packet.universe);
         uint8_t *data = packet.property_values + 1;
 
-        if (!e131.stats.num_packets || universe < UNIVERSE || universe > UNIVERSE_COUNT)
-            return;
+        if (universe < UNIVERSE || universe > UNIVERSE_COUNT) return; //async will take care about filling the buffer
 
         // Serial.printf("Universe %u / %u Channels | Packet#: %u / Errors: %u / CH1: %u\n",
         //               htons(packet.universe),                 // The Universe for this packet
@@ -139,17 +138,16 @@ void loop()
         //               e131.stats.packet_errors,               // Packet error counter
         //               packet.property_values[1]);             // Dimmer data for Channel 1
 
-        uint16_t len = e131.stats.num_packets / 3;
+        uint16_t len = 170; // (htons(packet.property_value_count) - 1) /3;
         uint16_t multipacketOffset = (universe - UNIVERSE) * 170; //if more than 170 LEDs (510 channels), client will send in next higher universe
-        if (ledCount <= multipacketOffset)
-            return;
-        if (len + multipacketOffset > ledCount)
-            len = ledCount - multipacketOffset;
+        if (ledCount <= multipacketOffset) return;
+        if (len + multipacketOffset > ledCount) len = ledCount - multipacketOffset;
 
         for (uint16_t i = 0; i < len; i++)
         {
-            RgbColor pixelColor = GammaColor(data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
-            strip.SetPixelColor(i, pixelColor);
+            uint16_t j = i * 3;
+            RgbColor pixelColor = GammaColor(data[j], data[j + 1], data[j + 2]);
+            strip.SetPixelColor(i + multipacketOffset, pixelColor);
         }
 
         strip.Show();
