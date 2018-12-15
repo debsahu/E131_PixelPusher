@@ -14,6 +14,7 @@
 //                               //https://github.com/me-no-dev/ESPAsyncUDP
 #include <NeoPixelBus.h>
 #include <pgmspace.h>
+#include "version.h"
 
 #define HOSTNAME "E131PixelPusher"
 #define HTTP_PORT 80
@@ -64,6 +65,9 @@ void setup()
 
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(200, "text/plain", "Send E1.31 Multicast UDP Request to " + WiFi.localIP().toString());
+    });
+    server.on("/status", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(200, "text/plain", SKETCH_VERSION);
     });
     server.on("/update", HTTP_GET, [](AsyncWebServerRequest *request) {
         AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", update_html);
