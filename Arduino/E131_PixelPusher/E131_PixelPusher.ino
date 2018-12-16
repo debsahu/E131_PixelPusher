@@ -1,12 +1,9 @@
 #include <ESP8266WiFi.h>
+#include <ESP8266mDNS.h>
 #include <ESPAsyncUDP.h>         //https://github.com/me-no-dev/ESPAsyncUDP
 #include <ESPAsyncE131.h>        //https://github.com/forkineye/ESPAsyncE131
-#ifdef ESP8266
 #include <Hash.h>
 #include <ESPAsyncTCP.h>         //https://github.com/me-no-dev/ESPAsyncTCP
-#else
-#include <AsyncTCP.h>
-#endif
 #include <ESPAsyncWebServer.h>   //https://github.com/me-no-dev/ESPAsyncWebServer
 #include <ESPAsyncWiFiManager.h> //https://github.com/alanswx/ESPAsyncWiFiManager
 #include <ESPAsyncDNSServer.h>   //https://github.com/devyte/ESPAsyncDNSServer
@@ -32,7 +29,7 @@ AsyncDNSServer dns;
 NeoEsp8266Dma800KbpsMethod dma = NeoEsp8266Dma800KbpsMethod(ledCount, 3);
 uint8_t *pixel = (uint8_t *)malloc(dma.getPixelsSize());
 
-#define SHOW_FPS_SERIAL //uncomment to see Serial FPS
+//#define SHOW_FPS_SERIAL //uncomment to see Serial FPS
 #ifdef SHOW_FPS_SERIAL
 uint64_t frameCt = 0;
 uint64_t PM = 0;
@@ -47,11 +44,12 @@ void setup()
     Serial.begin(115200);
     delay(10);
 
-    char NameChipId[64] = {0};
+    char NameChipId[64] = {0}, chipId[7] = { 0 };
+    snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
     snprintf(NameChipId, sizeof(NameChipId), "%s_%06x", HOSTNAME, ESP.getChipId());
 
     WiFi.mode(WIFI_STA); // Make sure you're in station mode
-    wifi_station_set_hostname(const_cast<char *>(NameChipId));
+    WiFi.hostname(const_cast<char *>(NameChipId));
     AsyncWiFiManager wifiManager(&server, &dns); //Local intialization. Once its business is done, there is no need to keep it around
     wifiManager.setConfigPortalTimeout(180);     //sets timeout until configuration portal gets turned off, useful to make it all retry or go to sleep in seconds
     if (!wifiManager.autoConnect(NameChipId))
@@ -60,7 +58,7 @@ void setup()
         ESP.restart();
     }
     Serial.println("");
-    Serial.print(F("Connected with IP: "));
+    Serial.print(F(">>> Connected with IP: "));
     Serial.println(WiFi.localIP());
 
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -77,7 +75,6 @@ void setup()
         bool shouldReboot = !Update.hasError();
         AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", shouldReboot?"OK":"FAIL");
         response->addHeader("Connection", "close");
-        response->addHeader("Access-Control-Allow-Origin", "*");
         request->send(response);
         if(shouldReboot) ESP.reset(); },
               [](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
@@ -104,16 +101,28 @@ void setup()
                 }
             } });
 
+    MDNS.setInstanceName(String(HOSTNAME " (" + String(chipId) + ")").c_str());
+    if (MDNS.begin(NameChipId)) {
+        MDNS.addService("http", "tcp", HTTP_PORT);
+        MDNS.addService("e131", "udp", E131_DEFAULT_PORT);
+        MDNS.addServiceTxt("e131", "udp", "CID", String(chipId));
+        MDNS.addServiceTxt("e131", "udp", "Model", "E131_PixelPusher");
+        MDNS.addServiceTxt("e131", "udp", "Manuf", "debsahu");
+        Serial.printf(">>> MDNS Started: http://%s.local/\n", NameChipId);
+    } else {
+        Serial.println(F(">>> Error setting up mDNS responder <<<"));
+    }
+
     server.begin();
 
     // Choose one to begin listening for E1.31 data
     //if (e131.begin(E131_UNICAST))                               // Listen via Unicast
     if (e131.begin(E131_MULTICAST, UNIVERSE, UNIVERSE_COUNT)) // Listen via Multicast
-        Serial.println(F("Listening for data..."));
+        Serial.println(F(">>> Listening for E1.31 data..."));
     else
-        Serial.println(F("*** e131.begin failed ***"));
+        Serial.println(F(">>> e131.begin failed :("));
     delay(1000);
-#ifdef SHOW_FPS_SERIAL
+#ifndef SHOW_FPS_SERIAL
     Serial.end();
 #endif
     dma.Initialize();
@@ -122,6 +131,8 @@ void setup()
 
 void loop()
 {
+    MDNS.update();
+
     if (!e131.isEmpty())
     {
         e131_packet_t packet;
