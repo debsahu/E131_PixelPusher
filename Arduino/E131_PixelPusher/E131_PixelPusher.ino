@@ -36,6 +36,7 @@ uint64_t PM = 0;
 float interval = 10 * 1000.0; // 10s
 #endif
 
+bool shouldReboot = false;
 char update_html[] PROGMEM = R"=====(<!DOCTYPE html><html lang="en"><head><title>Firmware Update</title><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width"><link rel="shortcut icon" type="image/x-icon" href="favicon.ico"></head><body><h3>Update Firmware</h3><br><form method="POST" action="/update" enctype="multipart/form-data"><input type="file" name="update"> <input type="submit" value="Update"></form></body></html>)=====";
 
 void setup()
@@ -62,7 +63,7 @@ void setup()
     Serial.println(WiFi.localIP());
 
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send(200, "text/plain", "Send E1.31 Multicast UDP Request to " + WiFi.localIP().toString());
+        request->send(200, "text/html", "<body align=center><h2>Send E1.31 Multicast UDP Request to " + WiFi.localIP().toString() + "</h2><br><br> Update <a href='/update'>Firmware?</a><br><br><a href='https://github.com/debsahu/E131_PixelPusher'>E131_PixelPusher</a> by @debsahu</body>");
     });
     server.on("/status", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(200, "text/plain", SKETCH_VERSION);
@@ -72,12 +73,11 @@ void setup()
         request->send(response);
     });
     server.on("/update", HTTP_POST, [](AsyncWebServerRequest *request) {
-        bool shouldReboot = !Update.hasError();
-        AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", shouldReboot?"OK":"FAIL");
+        shouldReboot = !Update.hasError();
+        AsyncWebServerResponse *response = request->beginResponse(200, "text/html", shouldReboot ? "<META http-equiv='refresh' content='15;URL=/'>Update Success, rebooting..." : "FAIL");
         response->addHeader("Connection", "close");
         request->send(response);
-        if(shouldReboot) ESP.reset(); },
-              [](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
+        }, [](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
           if (!filename.endsWith(".bin")) {
                 return;
             }
@@ -175,4 +175,12 @@ void loop()
         frameCt = 0;
     }
 #endif
+
+    if(shouldReboot) {
+        #ifdef SHOW_FPS_SERIAL
+        Serial.println("Rebooting...");
+        #endif
+        delay(100);
+        ESP.reset();
+    }
 }

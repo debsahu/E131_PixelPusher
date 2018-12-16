@@ -1,4 +1,4 @@
-#define SKETCH_VERSION "1.1.1"
+#define SKETCH_VERSION "1.1.2"
 
 /*
 * Dec 13, 2018 v1.0.0
@@ -12,4 +12,8 @@
 * - Minor bug fixes
 * - Add MDNS (new implementation on ESP8266 core v 2.5.0)
 * - Remove dist folder, supply dist with release
+*
+* Dec 16,2018 v1.1.2
+* - Changes to webserver reponses
+* - no FPS drop from above change
 */
