@@ -26,7 +26,7 @@ AsyncWebServer server(HTTP_PORT);
 AsyncDNSServer dns;
 // DNSServer dns;
 
-NeoEsp8266Dma800KbpsMethod dma = NeoEsp8266Dma800KbpsMethod(ledCount, 3);
+NeoEsp8266Dma800KbpsMethod dma = NeoEsp8266Dma800KbpsMethod(ledCount, 3);                     //uses RX/GPIO3 pin
 uint8_t *pixel = (uint8_t *)malloc(dma.getPixelsSize());
 
 //#define SHOW_FPS_SERIAL //uncomment to see Serial FPS

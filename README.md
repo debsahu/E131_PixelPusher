@@ -1,4 +1,7 @@
 # E131_PixelPusher
+
+[![Build Status](https://travis-ci.com/debsahu/E131_PixelPusher.svg?branch=master)](https://travis-ci.com/debsahu/E131_PixelPusher)
+
 Minimalistic Async code around Async E131 for ESP8266/ESP32
 
 - Completely Async
@@ -7,9 +10,7 @@ Minimalistic Async code around Async E131 for ESP8266/ESP32
 - Connect RX/GPIO3 to DIN of NeoPixel strip
 - Upload included [new firmware](https://github.com/debsahu/E131_PixelPusher/raw/master/Arduino/dist/firmware.bin) at http://<IP_ADDRESS>/update
 
-
 [![E131_PixelPusher](https://img.youtube.com/vi/lZ09GlO2_8s/0.jpg)](https://www.youtube.com/watch?v=lZ09GlO2_8s)
-
 
 ## Libraries Needed
 
@@ -29,8 +30,12 @@ Minimalistic Async code around Async E131 for ESP8266/ESP32
 
 ### Jinx
 - Download Jinx from [here](http://www.live-leds.de/downloads/)
-- Setup instructions coming!
+- Setup instructions: see video
 
 ### LEDfx
 - Download and installation instructions for LEDfx are [here](https://ahodges9.github.io/LedFx/)
-- Setup instructions coming!
+- Setup instructions: see video
+
+### xLights
+- Download xLights from [here](https://xlights.org/releases/)
+- Setup instructions: see video
