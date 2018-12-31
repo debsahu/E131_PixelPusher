@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.com/debsahu/E131_PixelPusher.svg?branch=master)](https://travis-ci.com/debsahu/E131_PixelPusher) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT) [![version](https://img.shields.io/badge/version-v1.1.2-blue.svg)](https://github.com/debsahu/E131_PixelPusher/releases/tag/1.1.2)
 
-Minimalistic Async code around Async E131 for ESP8266/ESP32
+Minimalistic Async code around Async E131 for ESP8266
 
 - Completely Async
 - WiFiManager Captive Portal to get WiFi credentials (Compile with `-DUSE_EADNS`)
