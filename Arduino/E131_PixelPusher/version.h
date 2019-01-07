@@ -16,4 +16,7 @@
 * Dec 16,2018 v1.1.2
 * - Changes to webserver reponses
 * - no FPS drop from above change
+*
+* Jan 7, 2019 v1.1.3
+* - Added ESP32 support
 */

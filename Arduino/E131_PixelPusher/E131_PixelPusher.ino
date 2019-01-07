@@ -1,15 +1,25 @@
+#ifdef ESP32
+#include <WiFi.h>
+#include <AsyncUDP.h>
+#include <AsyncTCP.h>            //https://github.com/me-no-dev/AsyncTCP
+#include <ESPmDNS.h>
+#include <SPIFFS.h>
+#include <Update.h>
+#include <DNSServer.h>
+#elif defined(ESP8266)
+#include <Hash.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
-#include <ESPAsyncUDP.h>         //https://github.com/me-no-dev/ESPAsyncUDP
-#include <ESPAsyncE131.h>        //https://github.com/forkineye/ESPAsyncE131
-#include <Hash.h>
 #include <ESPAsyncTCP.h>         //https://github.com/me-no-dev/ESPAsyncTCP
-#include <ESPAsyncWebServer.h>   //https://github.com/me-no-dev/ESPAsyncWebServer
-#include <ESPAsyncWiFiManager.h> //https://github.com/alanswx/ESPAsyncWiFiManager
+#include <ESPAsyncUDP.h>         //https://github.com/me-no-dev/ESPAsyncUDP
 #include <ESPAsyncDNSServer.h>   //https://github.com/devyte/ESPAsyncDNSServer
-// #include <DNSServer.h>
-//                               //https://github.com/me-no-dev/ESPAsyncUDP
-#include <NeoPixelBus.h>
+#else
+#error Platform not supported
+#endif
+#include <ESPAsyncE131.h>        //https://github.com/forkineye/ESPAsyncE131
+#include <ESPAsyncWiFiManager.h> //https://github.com/alanswx/ESPAsyncWiFiManager
+#include <ESPAsyncWebServer.h>   //https://github.com/me-no-dev/ESPAsyncWebServer
+#include <NeoPixelBus.h>         //https://github.com/Makuna/NeoPixelBus
 #include <pgmspace.h>
 #include "version.h"
 
@@ -23,10 +33,15 @@ uint16_t ledCount = UNIVERSE_COUNT * 170; // 170 LEDs per Universe
 // ESPAsyncE131 instance with UNIVERSE_COUNT buffer slots
 ESPAsyncE131 e131(UNIVERSE_COUNT);
 AsyncWebServer server(HTTP_PORT);
-AsyncDNSServer dns;
-// DNSServer dns;
 
-NeoEsp8266Dma800KbpsMethod dma = NeoEsp8266Dma800KbpsMethod(ledCount, 3);                     //uses RX/GPIO3 pin
+#ifdef ESP32
+  #define PIN 2 //Use any pin under 32
+  NeoEsp32BitBangWs2813Method dma = NeoEsp32BitBangWs2813Method(PIN, ledCount, 3);
+  DNSServer dns;
+#elif defined(ESP8266)
+  NeoEsp8266Dma800KbpsMethod dma = NeoEsp8266Dma800KbpsMethod(ledCount, 3);                     //uses RX/GPIO3 pin
+  AsyncDNSServer dns;
+#endif
 uint8_t *pixel = (uint8_t *)malloc(dma.getPixelsSize());
 
 //#define SHOW_FPS_SERIAL //uncomment to see Serial FPS
@@ -45,13 +60,22 @@ void setup()
     Serial.begin(115200);
     delay(10);
 
-    char NameChipId[64] = {0}, chipId[7] = { 0 };
-    snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
-    snprintf(NameChipId, sizeof(NameChipId), "%s_%06x", HOSTNAME, ESP.getChipId());
+    char NameChipId[64] = {0}, chipId[9] = {0};
+    #ifdef ESP32
+        snprintf(chipId, sizeof(chipId), "%08x", (uint32_t)ESP.getEfuseMac());
+        snprintf(NameChipId, sizeof(NameChipId), "%s_%08x", HOSTNAME, (uint32_t)ESP.getEfuseMac());
 
-    WiFi.mode(WIFI_STA); // Make sure you're in station mode
-    WiFi.hostname(const_cast<char *>(NameChipId));
-    AsyncWiFiManager wifiManager(&server, &dns); //Local intialization. Once its business is done, there is no need to keep it around
+        WiFi.mode(WIFI_STA); // Make sure you're in station mode
+        WiFi.setHostname(const_cast<char *>(NameChipId));
+        AsyncWiFiManager wifiManager(&server, &dns);
+    #else
+        snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
+        snprintf(NameChipId, sizeof(NameChipId), "%s_%06x", HOSTNAME, ESP.getChipId());
+
+        WiFi.mode(WIFI_STA); // Make sure you're in station mode
+        WiFi.hostname(const_cast<char *>(NameChipId));
+        AsyncWiFiManager wifiManager(&server, &dns); //Local intialization. Once its business is done, there is no need to keep it around
+    #endif
     wifiManager.setConfigPortalTimeout(180);     //sets timeout until configuration portal gets turned off, useful to make it all retry or go to sleep in seconds
     if (!wifiManager.autoConnect(NameChipId))
     {
@@ -83,8 +107,13 @@ void setup()
             }
             if(!index){
                 Serial.printf("Update Start: %s\n", filename.c_str());
-                Update.runAsync(true);
-                if(!Update.begin((ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000)) {
+                #ifdef ESP32
+                uint32_t maxSketchSpace = len; // for ESP32 you just supply the length of file
+                #elif defined(ESP8266)
+                Update.runAsync(true); // There is no async for ESP32
+                uint32_t maxSketchSpace = ((ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000);
+                #endif
+                if(!Update.begin(maxSketchSpace)) {
                 Update.printError(Serial);
                 }
             }
@@ -113,6 +142,7 @@ void setup()
         Serial.println(F(">>> Error setting up mDNS responder <<<"));
     }
 
+    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
     server.begin();
 
     // Choose one to begin listening for E1.31 data
@@ -131,7 +161,9 @@ void setup()
 
 void loop()
 {
-    MDNS.update();
+    #ifdef ESP8266
+        MDNS.update();
+    #endif
 
     if (!e131.isEmpty())
     {
@@ -181,6 +213,6 @@ void loop()
         Serial.println("Rebooting...");
         #endif
         delay(100);
-        ESP.reset();
+        ESP.restart();
     }
 }
