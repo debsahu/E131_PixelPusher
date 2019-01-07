@@ -1,14 +1,15 @@
 # E131_PixelPusher
 
-[![Build Status](https://travis-ci.com/debsahu/E131_PixelPusher.svg?branch=master)](https://travis-ci.com/debsahu/E131_PixelPusher) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT) [![version](https://img.shields.io/github/release/debsahu/E131_PixelPusher.svg)](https://github.com/debsahu/E131_PixelPusher/releases/tag/1.1.2)
+[![Build Status](https://travis-ci.com/debsahu/E131_PixelPusher.svg?branch=master)](https://travis-ci.com/debsahu/E131_PixelPusher) [![License: MIT](https://img.shields.io/github/license/debsahu/E131_PixelPusher.svg)](https://opensource.org/licenses/MIT) [![version](https://img.shields.io/github/release/debsahu/E131_PixelPusher.svg)](https://github.com/debsahu/E131_PixelPusher/releases/tag/1.1.2)
 
-Minimalistic Async code around Async E131 for ESP8266
+Minimalistic Async code around Async E131 for ESP8266/ESP32
 
 - Completely Async
-- WiFiManager Captive Portal to get WiFi credentials (Compile with `-DUSE_EADNS`)
+- WiFiManager Captive Portal to get WiFi credentials (Compile with `-DUSE_EADNS` for ESP8266)
 - Subscribes to E131 multicast
-- Connect RX/GPIO3 to DIN of NeoPixel strip
-- Upload included [new firmware](https://github.com/debsahu/E131_PixelPusher/raw/master/Arduino/dist/firmware.bin) at http://<IP_ADDRESS>/update
+- Connect RX/GPIO3 to DIN of NeoPixel strip, and any PIN (<GPIO32) specified for ESP32
+- Upload included [firmware.bin](https://github.com/debsahu/E131_PixelPusher/releases/latest) at http://<IP_ADDRESS>/update for ESP8266, compile your own for ESP32
+- Included relavent lines for APA102/Dotstar LED strip
 
 [![E131_PixelPusher](https://img.youtube.com/vi/lZ09GlO2_8s/0.jpg)](https://www.youtube.com/watch?v=lZ09GlO2_8s)
 
