@@ -1,6 +1,6 @@
 # E131_PixelPusher
 
-[![Build Status](https://travis-ci.com/debsahu/E131_PixelPusher.svg?branch=master)](https://travis-ci.com/debsahu/E131_PixelPusher) [![License: MIT](https://img.shields.io/github/license/debsahu/E131_PixelPusher.svg)](https://opensource.org/licenses/MIT) [![version](https://img.shields.io/github/release/debsahu/E131_PixelPusher.svg)](https://github.com/debsahu/E131_PixelPusher/releases/tag/1.1.2)
+[![Build Status](https://travis-ci.com/debsahu/E131_PixelPusher.svg?branch=master)](https://travis-ci.com/debsahu/E131_PixelPusher) [![License: MIT](https://img.shields.io/github/license/debsahu/E131_PixelPusher.svg)](https://opensource.org/licenses/MIT) [![version](https://img.shields.io/github/release/debsahu/E131_PixelPusher.svg)](https://github.com/debsahu/E131_PixelPusher/releases/tag/1.1.2) [![LastCommit](https://img.shields.io/github/last-commit/debsahu/E131_PixelPusher.svg?style=social)](https://github.com/debsahu/E131_PixelPusher/commits/master)
 
 Minimalistic Async code around Async E131 for ESP8266/ESP32
 

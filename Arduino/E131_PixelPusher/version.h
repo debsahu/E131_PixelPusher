@@ -17,9 +17,7 @@
 * - Changes to webserver reponses
 * - no FPS drop from above change
 *
-* Jan 7, 2019 v1.1.3
-* - Added ESP32 support
-*
-* Jan 7, 2019 v1.1.4
+* Jan 7, 2019 (commented by default so version remains same)
+* - Added ESP32 support (check platformio.ini for compiling details)
 * - APA102/DotStar relavent lines
 */
