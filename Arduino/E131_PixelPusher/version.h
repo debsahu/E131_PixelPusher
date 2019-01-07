@@ -19,4 +19,7 @@
 *
 * Jan 7, 2019 v1.1.3
 * - Added ESP32 support
+*
+* Jan 7, 2019 v1.1.4
+* - APA102/DotStar relavent lines
 */

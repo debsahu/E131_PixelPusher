@@ -40,8 +40,18 @@ AsyncWebServer server(HTTP_PORT);
   DNSServer dns;
 #elif defined(ESP8266)
   NeoEsp8266Dma800KbpsMethod dma = NeoEsp8266Dma800KbpsMethod(ledCount, 3);                     //uses RX/GPIO3 pin
+
+  //APA102/DotStar
+  //Hardware SPI method: GPIO14 is CLK, GPIO13 is DATA
+  //DotStarSpiMethod dma = DotStarSpiMethod(ledCount, 3); 
+  //
+  //Software SPI method: Any pin can be clock and data
+  //#define PIN_CLK 14
+  //#define PIN_DATA 13
+  //DotStarMethod dma = DotStarMethod(PIN_CLK, PIN_DATA, ledCount, 3);
   AsyncDNSServer dns;
 #endif
+
 uint8_t *pixel = (uint8_t *)malloc(dma.getPixelsSize());
 
 //#define SHOW_FPS_SERIAL //uncomment to see Serial FPS
