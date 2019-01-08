@@ -12,7 +12,11 @@
 #include <ESP8266mDNS.h>
 #include <ESPAsyncTCP.h>         //https://github.com/me-no-dev/ESPAsyncTCP
 #include <ESPAsyncUDP.h>         //https://github.com/me-no-dev/ESPAsyncUDP
+#if defined(ESP8266) and (defined(PIO_PLATFORM) or defined(USE_EADNS))
 #include <ESPAsyncDNSServer.h>   //https://github.com/devyte/ESPAsyncDNSServer
+#else
+#include <DNSServer.h>
+#endif
 #else
 #error Platform not supported
 #endif
@@ -49,7 +53,11 @@ AsyncWebServer server(HTTP_PORT);
   //#define PIN_CLK 14
   //#define PIN_DATA 13
   //DotStarMethod dma = DotStarMethod(PIN_CLK, PIN_DATA, ledCount, 3);
-  AsyncDNSServer dns;
+  #if defined(ESP8266) and (defined(PIO_PLATFORM) or defined(USE_EADNS))
+    AsyncDNSServer dns;
+  #else
+    DNSServer dns;
+  #endif
 #endif
 
 uint8_t *pixel = (uint8_t *)malloc(dma.getPixelsSize());
@@ -62,7 +70,7 @@ float interval = 10 * 1000.0; // 10s
 #endif
 
 bool shouldReboot = false;
-char update_html[] PROGMEM = R"=====(<!DOCTYPE html><html lang="en"><head><title>Firmware Update</title><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width"><link rel="shortcut icon" type="image/x-icon" href="favicon.ico"></head><body><h3>Update Firmware</h3><br><form method="POST" action="/update" enctype="multipart/form-data"><input type="file" name="update"> <input type="submit" value="Update"></form></body></html>)=====";
+const char update_html[] PROGMEM = "<!DOCTYPE html><html lang=\"en\"><head><title>Firmware Update</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><meta name=\"viewport\" content=\"width=device-width\"><link rel=\"shortcut icon\" type=\"image/x-icon\" href=\"favicon.ico\"></head><body><h3>Update Firmware</h3><br><form method=\"POST\" action=\"/update\" enctype=\"multipart/form-data\"><input type=\"file\" name=\"update\"> <input type=\"submit\" value=\"Update\"></form></body></html>";
 
 void setup()
 {
@@ -144,9 +152,11 @@ void setup()
     if (MDNS.begin(NameChipId)) {
         MDNS.addService("http", "tcp", HTTP_PORT);
         MDNS.addService("e131", "udp", E131_DEFAULT_PORT);
+        #ifndef ARDUINO_ESP8266_RELEASE_2_4_2
         MDNS.addServiceTxt("e131", "udp", "CID", String(chipId));
         MDNS.addServiceTxt("e131", "udp", "Model", "E131_PixelPusher");
         MDNS.addServiceTxt("e131", "udp", "Manuf", "debsahu");
+        #endif
         Serial.printf(">>> MDNS Started: http://%s.local/\n", NameChipId);
     } else {
         Serial.println(F(">>> Error setting up mDNS responder <<<"));

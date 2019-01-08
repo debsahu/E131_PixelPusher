@@ -20,4 +20,7 @@
 * Jan 7, 2019 (commented by default so version remains same)
 * - Added ESP32 support (check platformio.ini for compiling details)
 * - APA102/DotStar relavent lines
+*
+* Jab 8, 2019 v1.1.2 (commented by default so version remains same)
+* - Added Arduino IDE compatibility mode, DNS server is not Async for ArduinoIDE
 */
