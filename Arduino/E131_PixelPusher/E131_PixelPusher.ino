@@ -39,9 +39,19 @@ ESPAsyncE131 e131(UNIVERSE_COUNT);
 AsyncWebServer server(HTTP_PORT);
 
 #ifdef ESP32
-  #define PIN 2 //Use any pin under 32
-  NeoEsp32BitBangWs2813Method dma = NeoEsp32BitBangWs2813Method(PIN, ledCount, 3);
-  DNSServer dns;
+  //#define PIN 2 //Use any pin under 32
+  //NeoEsp32BitBangWs2813Method dma = NeoEsp32BitBangWs2813Method(PIN, ledCount, 3);
+  //DNSServer dns;
+  
+  //APA102/DotStar
+  //Hardware SPI method: GPIO14 is CLK, GPIO13 is DATA
+  //DotStarSpiMethod dma = DotStarSpiMethod(ledCount, 3); 
+  //
+  //Software SPI method: Any pin can be clock and data
+  #define PIN_CLK 14
+  #define PIN_DATA 13
+  DotStarMethod dma = DotStarMethod(PIN_CLK, PIN_DATA, ledCount, 3);
+  
 #elif defined(ESP8266)
   NeoEsp8266Dma800KbpsMethod dma = NeoEsp8266Dma800KbpsMethod(ledCount, 3);                     //uses RX/GPIO3 pin
 
@@ -53,11 +63,12 @@ AsyncWebServer server(HTTP_PORT);
   //#define PIN_CLK 14
   //#define PIN_DATA 13
   //DotStarMethod dma = DotStarMethod(PIN_CLK, PIN_DATA, ledCount, 3);
-  #if defined(ESP8266) and (defined(PIO_PLATFORM) or defined(USE_EADNS))
-    AsyncDNSServer dns;
-  #else
-    DNSServer dns;
-  #endif
+#endif
+
+#if defined(ESP8266) and (defined(PIO_PLATFORM) or defined(USE_EADNS))
+AsyncDNSServer dns;
+#else
+DNSServer dns;
 #endif
 
 uint8_t *pixel = (uint8_t *)malloc(dma.getPixelsSize());
