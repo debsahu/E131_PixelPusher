@@ -44,13 +44,13 @@ AsyncWebServer server(HTTP_PORT);
   //DNSServer dns;
   
   //APA102/DotStar
-  //Hardware SPI method: GPIO14 is CLK, GPIO13 is DATA
-  //DotStarSpiMethod dma = DotStarSpiMethod(ledCount, 3); 
+  //Hardware SPI method: GPIO18 is CLK, GPIO23 is DATA
+  DotStarSpiMethod dma = DotStarSpiMethod(ledCount, 3); 
   //
   //Software SPI method: Any pin can be clock and data
-  #define PIN_CLK 14
-  #define PIN_DATA 13
-  DotStarMethod dma = DotStarMethod(PIN_CLK, PIN_DATA, ledCount, 3);
+  //#define PIN_CLK 18
+  //#define PIN_DATA 23
+  //DotStarMethod dma = DotStarMethod(PIN_CLK, PIN_DATA, ledCount, 3);
   
 #elif defined(ESP8266)
   NeoEsp8266Dma800KbpsMethod dma = NeoEsp8266Dma800KbpsMethod(ledCount, 3);                     //uses RX/GPIO3 pin
@@ -91,6 +91,10 @@ void setup()
 
     char NameChipId[64] = {0}, chipId[9] = {0};
     #ifdef ESP32
+        Serial.print("Hardware SPI //DATA PIN: ");
+        Serial.println(MOSI); //GPIO23?
+        Serial.print("Hardware SPI //CLOCK PIN: ");
+        Serial.println(SCK);  //GPIO18?
         snprintf(chipId, sizeof(chipId), "%08x", (uint32_t)ESP.getEfuseMac());
         snprintf(NameChipId, sizeof(NameChipId), "%s_%08x", HOSTNAME, (uint32_t)ESP.getEfuseMac());
 
