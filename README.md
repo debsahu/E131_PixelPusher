@@ -17,15 +17,16 @@ Minimalistic Async code around Async E131 for ESP8266/ESP32
 
 [platformio.ini](https://github.com/debsahu/E131_PixelPusher/blob/master/platformio.ini) is included, use [PlatformIO](https://platformio.org/platformio-ide) and it will take care of installing the following libraries.
 
-| Library                   | Link                                                       |
-|---------------------------|------------------------------------------------------------|
-|ESPAsyncE131               |https://github.com/forkineye/ESPAsyncE131                   |
-|ESPAsyncUDP                |https://github.com/me-no-dev/ESPAsyncUDP                    |
-|ESPAsyncTCP                |https://github.com/me-no-dev/ESPAsyncTCP                    |
-|NeoPixelBus                |https://github.com/Makuna/NeoPixelBus                       |
-|ESPAsyncWiFiManager        |https://github.com/alanswx/ESPAsyncWiFiManager              |
-|ESPAsyncDNSServer          |https://github.com/devyte/ESPAsyncDNSServer                 |
-|ESP Async WebServer        |https://github.com/me-no-dev/ESPAsyncWebServer              |
+| Library                   | Link                                                       | Platform    |
+|---------------------------|------------------------------------------------------------|-------------|
+|ESPAsyncE131               |https://github.com/forkineye/ESPAsyncE131                   |ESP8266/32   |
+|ESPAsyncUDP                |https://github.com/me-no-dev/ESPAsyncUDP                    |ESP8266      |
+|ESPAsyncTCP                |https://github.com/me-no-dev/ESPAsyncTCP                    |ESP8266      |
+|NeoPixelBus                |https://github.com/Makuna/NeoPixelBus                       |ESP8266/32   |
+|ESPAsyncWiFiManager        |https://github.com/alanswx/ESPAsyncWiFiManager              |ESP8266/32   |
+|ESPAsyncDNSServer          |https://github.com/devyte/ESPAsyncDNSServer                 |ESP8266      |
+|ESP Async WebServer        |https://github.com/me-no-dev/ESPAsyncWebServer              |ESP8266/32   |
+|AsyncTCP                   |https://github.com/me-no-dev/AsyncTCP                       |ESP32        |
 
 ## Pushing E1.31 UDP Data
 
