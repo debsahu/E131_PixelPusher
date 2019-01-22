@@ -1,4 +1,4 @@
-#define SKETCH_VERSION "1.1.2"
+#define SKETCH_VERSION "1.2.0"
 
 /*
 * Dec 13, 2018 v1.0.0
@@ -21,6 +21,10 @@
 * - Added ESP32 support (check platformio.ini for compiling details)
 * - APA102/DotStar relavent lines
 *
-* Jab 8, 2019 v1.1.2 (commented by default so version remains same)
+* Jan 8, 2019 v1.1.2 (commented by default so version remains same)
 * - Added Arduino IDE compatibility mode, DNS server is not Async for ArduinoIDE
+*
+* Jan 21, 2019 v1.2.0
+* - Add web interface
+* - user can choose starting universe, unicast/umulticast, total number of universe
 */
