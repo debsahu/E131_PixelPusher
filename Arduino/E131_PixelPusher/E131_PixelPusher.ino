@@ -34,8 +34,8 @@
 #define HOSTNAME "E131PixelPusher"
 #define HTTP_PORT 80
 
-uint8_t UNIVERSE = 1;                        // First DMX Universe to listen for
-uint8_t UNIVERSE_COUNT = 7;                  // Total number of Universes to listen for, starting at UNIVERSE max 7 for multicast and 12 for unicast
+uint8_t START_UNIVERSE = 1;                  // First DMX Universe to listen for
+uint8_t UNIVERSE_COUNT = 7;                  // Total number of Universes to listen for, starting at START_UNIVERSE max 7 for multicast and 12 for unicast
 uint16_t ledCount = 12 * 170;                // 170 LEDs per Universe
 bool unicast_flag = false;
 
@@ -205,7 +205,7 @@ DNSServer dns;
 
 struct {
     bool unicast = false;
-    uint16_t startUniverse = UNIVERSE;
+    uint16_t startUniverse = START_UNIVERSE;
     uint16_t noOfUniverses = UNIVERSE_COUNT;
 } config;
 
@@ -223,9 +223,10 @@ bool shouldReboot = false;
 const char update_html[] PROGMEM = "<!DOCTYPE html><html lang=\"en\"><head><title>Firmware Update</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><meta name=\"viewport\" content=\"width=device-width\"><link rel=\"shortcut icon\" type=\"image/x-icon\" href=\"favicon.ico\"></head><body><h3>Update Firmware</h3><br><form method=\"POST\" action=\"/update\" enctype=\"multipart/form-data\"><input type=\"file\" name=\"update\"> <input type=\"submit\" value=\"Update\"></form></body></html>";
 
 void initE131(void){
-    ledCount = (UNIVERSE_COUNT - UNIVERSE + 1) * 170;
-    e131 = new ESPAsyncE131(ledCount);
-    if (e131->begin((unicast_flag) ? E131_UNICAST : E131_MULTICAST, UNIVERSE, UNIVERSE_COUNT)) // Listen via Multicast
+    uint8_t TOTAL_UNIVERSES = (UNIVERSE_COUNT - START_UNIVERSE + 1);
+    ledCount = TOTAL_UNIVERSES * 170;
+    e131 = new ESPAsyncE131(TOTAL_UNIVERSES);
+    if (e131->begin((unicast_flag) ? E131_UNICAST : E131_MULTICAST, START_UNIVERSE, UNIVERSE_COUNT)) // Listen via Unicast/Multicast
         Serial.println(F(">>> Listening for E1.31 data..."));
     else
         Serial.println(F(">>> e131.begin failed :("));
@@ -234,19 +235,19 @@ void initE131(void){
 void readEEPROM(void){
     EEPROM.get(eeprom_addr, config);
     unicast_flag = config.unicast;
-    UNIVERSE = config.startUniverse;
+    START_UNIVERSE = config.startUniverse;
     UNIVERSE_COUNT = config.noOfUniverses;
     #ifdef SERIAL_DEBUG
-    Serial.printf("READ>> Mode: %s Start Universe: %d No of Universes: %d", (unicast_flag)?"unicast":"multicast", UNIVERSE, UNIVERSE_COUNT);
+    Serial.printf("READ>> Mode: %s Start Universe: %d No of Universes: %d", (unicast_flag)?"unicast":"multicast", START_UNIVERSE, UNIVERSE_COUNT);
     #endif
 }
 
 void writeEEPROM(void){
     config.unicast = unicast_flag;
-    config.startUniverse = UNIVERSE;
+    config.startUniverse = START_UNIVERSE;
     config.noOfUniverses = UNIVERSE_COUNT;
     #ifdef SERIAL_DEBUG
-    Serial.printf("WRITE>> Mode: %s Start Universe: %d No of Universes: %d", (unicast_flag)?"unicast":"multicast", UNIVERSE, UNIVERSE_COUNT);
+    Serial.printf("WRITE>> Mode: %s Start Universe: %d No of Universes: %d", (unicast_flag)?"unicast":"multicast", START_UNIVERSE, UNIVERSE_COUNT);
     #endif
     EEPROM.put(eeprom_addr, config);
     EEPROM.commit();
@@ -302,7 +303,7 @@ void setup()
         #endif
     });
     server.on("/data", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send(200, "application/json", "{\"ct\":" + String(ledCount) + ",\"mode\":\"" + String((unicast_flag) ? "unicast" : "multicast") + "\",\"su\":" + String(UNIVERSE) + ",\"uct\":" + String(UNIVERSE_COUNT) + "}");
+        request->send(200, "application/json", "{\"ct\":" + String(ledCount) + ",\"mode\":\"" + String((unicast_flag) ? "unicast" : "multicast") + "\",\"su\":" + String(START_UNIVERSE) + ",\"uct\":" + String(UNIVERSE_COUNT) + "}");
     });
     server.on("/updateparams", HTTP_POST, [](AsyncWebServerRequest *request) {
         bool hasReqArgs = false;
@@ -311,7 +312,7 @@ void setup()
             hasReqArgs = true;
         }
         if (request->hasParam("su", true)) {
-            UNIVERSE = constrain(request->getParam("su", true)->value().toInt(), 1, (unicast_flag)?12:7);
+            START_UNIVERSE = constrain(request->getParam("su", true)->value().toInt(), 1, (unicast_flag)?12:7);
             hasReqArgs = true;
         }
         if (request->hasParam("uct", true)) {
@@ -323,7 +324,7 @@ void setup()
             writeEEPROM();
             hasReqArgs = false;
         }
-        request->send(200, "text/html", "<META http-equiv='refresh' content='3;URL=/'><body align=center>LED Count: "+ String(ledCount) + ", Mode: " + String((unicast_flag) ? "unicast" : "multicast") + ", Starting Universe: " + String(UNIVERSE) + ", Universe Count: " + String(UNIVERSE_COUNT) + "</body>");
+        request->send(200, "text/html", "<META http-equiv='refresh' content='3;URL=/'><body align=center>LED Count: "+ String(ledCount) + ", Mode: " + String((unicast_flag) ? "unicast" : "multicast") + ", Starting Universe: " + String(START_UNIVERSE) + ", Universe Count: " + String(UNIVERSE_COUNT) + "</body>");
     });
     server.on("/status", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(200, "text/plain", SKETCH_VERSION);
@@ -406,7 +407,7 @@ void loop()
         uint16_t universe = htons(packet.universe);
         uint8_t *data = packet.property_values + 1;
 
-        if (universe < UNIVERSE || universe > UNIVERSE_COUNT)
+        if (universe < START_UNIVERSE || universe > UNIVERSE_COUNT)
             return; //async will take care about filling the buffer
 
         #ifdef SERIAL_DEBUG
@@ -418,7 +419,7 @@ void loop()
                       packet.property_values[1]);             // Dimmer data for Channel 1
         #endif
 
-        uint16_t multipacketOffset = (universe - UNIVERSE) * 170; //if more than 170 LEDs (510 channels), client will send in next higher universe
+        uint16_t multipacketOffset = (universe - START_UNIVERSE) * 170; //if more than 170 LEDs (510 channels), client will send in next higher universe
         if (ledCount <= multipacketOffset)
             return;
         uint16_t len = (170 + multipacketOffset > ledCount) ? (ledCount - multipacketOffset) * 3 : 510;
