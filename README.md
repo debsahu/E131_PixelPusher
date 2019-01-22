@@ -1,10 +1,11 @@
 # E131_PixelPusher
 
-[![Build Status](https://travis-ci.com/debsahu/E131_PixelPusher.svg?branch=master)](https://travis-ci.com/debsahu/E131_PixelPusher) [![License: MIT](https://img.shields.io/github/license/debsahu/E131_PixelPusher.svg)](https://opensource.org/licenses/MIT) [![version](https://img.shields.io/github/release/debsahu/E131_PixelPusher.svg)](https://github.com/debsahu/E131_PixelPusher/releases/tag/1.1.2) [![LastCommit](https://img.shields.io/github/last-commit/debsahu/E131_PixelPusher.svg?style=social)](https://github.com/debsahu/E131_PixelPusher/commits/master)
+[![Build Status](https://travis-ci.com/debsahu/E131_PixelPusher.svg?branch=master)](https://travis-ci.com/debsahu/E131_PixelPusher) [![License: MIT](https://img.shields.io/github/license/debsahu/E131_PixelPusher.svg)](https://opensource.org/licenses/MIT) [![version](https://img.shields.io/github/release/debsahu/E131_PixelPusher.svg)](https://github.com/debsahu/E131_PixelPusher/releases/tag/1.2.0) [![LastCommit](https://img.shields.io/github/last-commit/debsahu/E131_PixelPusher.svg?style=social)](https://github.com/debsahu/E131_PixelPusher/commits/master)
 
 Minimalistic Async code around Async E131 for ESP8266/ESP32
 
 - Completely Async
+- Web-interface to set starting universe, unicast/umulticast, total number of universes
 - WiFiManager Captive Portal to get WiFi credentials (Compile with `-DUSE_EADNS` for ESP8266)
 - Subscribes to E131 multicast
 - Connect RX/GPIO3 to DIN of NeoPixel strip, and any PIN (<GPIO32) specified for ESP32
