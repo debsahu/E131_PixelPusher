@@ -31,7 +31,7 @@
             var maxUniverse = 170 * 7;
             if(document.frmmr.mode.value == "unicast") maxUniverse = 170 * 12;
             if( suval > uctval || (uctval - suval + 1) <= 0 || 170 * (uctval - suval + 1) > maxUniverse) {
-                if(suval > uctval) alert("Starting universe cant be higher than total number of universes!");
+                if(suval > uctval) alert("Starting universe cant be higher than ending universe!");
                 if(uctval - suval + 1 <= 0) alert("Number of Pixels cant be negative/zero!");
                 if(170 * (uctval - suval + 1) > maxUniverse) alert("Cant access that many universes!");
                 return false;
@@ -133,9 +133,9 @@
                 <option value="mulicast" selected>MULTICAST</option>
             </select>
             <br>
-            Start Universe: <input id="su" name="su" type="number" placeholder="starting universe" max="12" min="1" onkeyup="this.value=this.value.replace(/[^\d]/,'')" onblur="calcPixels()" onclick="calcPixels()"/>
+            Start Universe: <input id="su" name="su" type="number" placeholder="Starting universe" max="12" min="1" onkeyup="this.value=this.value.replace(/[^\d]/,'')" onblur="calcPixels()" onclick="calcPixels()"/>
             <br>
-            Max Universe : <input id="uct" name="uct" type="number" placeholder="max universe" max="12" min="1" onkeyup="this.value=this.value.replace(/[^\d]/,'')" onblur="calcPixels()" onclick="calcPixels()"/>
+            End Universe : <input id="uct" name="uct" type="number" placeholder="Ending universe" max="12" min="1" onkeyup="this.value=this.value.replace(/[^\d]/,'')" onblur="calcPixels()" onclick="calcPixels()"/>
             <br>
             <input class="subbt" type="submit" value="Update">
         </form>
