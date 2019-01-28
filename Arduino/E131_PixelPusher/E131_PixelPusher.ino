@@ -243,6 +243,7 @@ void initDMA(void)
 #endif
     dma->Initialize();
     pixel = (uint8_t *)malloc(ledCount);
+    memset(pixel, 0, sizeof(pixel));
 }
 
 void initE131(void)
@@ -424,7 +425,6 @@ void setup()
 #if !defined(SHOW_FPS_SERIAL) or !defined(SERIAL_DEBUG)
     Serial.end();
 #endif
-    memset(pixel, 0, sizeof(pixel));
 }
 
 void loop()
