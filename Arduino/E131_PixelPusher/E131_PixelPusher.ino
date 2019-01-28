@@ -341,26 +341,20 @@ void setup()
         request->send(200, "application/json", "{\"ct\":" + String(ledCount) + ",\"mode\":\"" + String((unicast_flag) ? "unicast" : "multicast") + "\",\"su\":" + String(START_UNIVERSE) + ",\"uct\":" + String(END_UNIVERSE - START_UNIVERSE + 1) + "}");
     });
     server.on("/updateparams", HTTP_POST, [](AsyncWebServerRequest *request) {
-        bool hasReqArgs = false;
         if (request->hasParam("mode", true))
         {
             unicast_flag = (request->getParam("mode", true)->value() == "unicast") ? true : false;
-            hasReqArgs = true;
+            updatedParams = true;
         }
         if (request->hasParam("su", true))
         {
             START_UNIVERSE = constrain(request->getParam("su", true)->value().toInt(), 1, (unicast_flag) ? 12 : 7);
-            hasReqArgs = true;
+            updatedParams = true;
         }
         if (request->hasParam("uct", true))
         {
             END_UNIVERSE = constrain(request->getParam("uct", true)->value().toInt(), 1, (unicast_flag) ? 12 : 7);
-            hasReqArgs = true;
-        }
-        if (hasReqArgs)
-        {
             updatedParams = true;
-            hasReqArgs = false;
         }
         request->send(200, "text/html", "<META http-equiv='refresh' content='3;URL=/'><body align=center>LED Count: " + String(ledCount) + ", Mode: " + String((unicast_flag) ? "unicast" : "multicast") + ", Starting Universe: " + String(START_UNIVERSE) + ", Universe Count: " + String(END_UNIVERSE - START_UNIVERSE + 1) + "</body>");
     });
@@ -450,10 +444,10 @@ void loop()
         e131_packet_t packet;
         e131->pull(&packet); // Pull packet from ring buffer
 
-        uint16_t universe = htons(packet.universe);
+        uint16_t CURRENT_UNIVERSE = htons(packet.universe);
         uint8_t *data = packet.property_values + 1;
 
-        if (universe < START_UNIVERSE || universe > END_UNIVERSE)
+        if (CURRENT_UNIVERSE < START_UNIVERSE || CURRENT_UNIVERSE > END_UNIVERSE)
             return; //async will take care about filling the buffer
 
 #ifdef SERIAL_DEBUG
@@ -465,7 +459,7 @@ void loop()
                       packet.property_values[1]);             // Dimmer data for Channel 1
 #endif
 
-        uint16_t multipacketOffset = (universe - START_UNIVERSE) * 170; //if more than 170 LEDs (510 channels), client will send in next higher universe
+        uint16_t multipacketOffset = (CURRENT_UNIVERSE - START_UNIVERSE) * 170; //if more than 170 LEDs (510 channels), client will send in next higher universe
         if (ledCount <= multipacketOffset)
             return;
         uint16_t len = (170 + multipacketOffset > ledCount) ? (ledCount - multipacketOffset) * 3 : 510;
