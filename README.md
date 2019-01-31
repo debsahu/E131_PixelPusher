@@ -10,7 +10,9 @@ Minimalistic Async code around Async E131 for ESP8266/ESP32
 - Subscribes to E131 multicast
 - Connect RX/GPIO3 to DIN of NeoPixel strip, and any PIN (<GPIO32) specified for ESP32
 - Upload included [firmware.bin](https://github.com/debsahu/E131_PixelPusher/releases/latest) at http://<IP_ADDRESS>/update for ESP8266, compile your own for ESP32
-- Included relavent lines for APA102/Dotstar LED strip
+- Included relavent lines for APA102/Dotstar LED strip: Comment `//#define USE_NEOPIXELS xxx` and uncomment `#define USE_DOTSTAR`
+  - ESP8266 Hardware SPI: Uses GPIO14(SCK) for CLOCK and GPIO13(MOSI) for DATA
+  - ESP32 Hardware SPI: Uses GPIO18(SCK) for CLOCK and GPIO23(MOSI) for DATA
 
 [![E131_PixelPusher](https://img.youtube.com/vi/lZ09GlO2_8s/0.jpg)](https://www.youtube.com/watch?v=lZ09GlO2_8s)
 
@@ -28,6 +30,7 @@ Minimalistic Async code around Async E131 for ESP8266/ESP32
 |ESPAsyncDNSServer          |https://github.com/devyte/ESPAsyncDNSServer                 |ESP8266      |
 |ESP Async WebServer        |https://github.com/me-no-dev/ESPAsyncWebServer              |ESP8266/32   |
 |AsyncTCP                   |https://github.com/me-no-dev/AsyncTCP                       |ESP32        |
+|Adafruit's Dot Star        |https://github.com/debsahu/Adafruit_DotStar                 |ESP8266/32   |
 
 ## Pushing E1.31 UDP Data
 

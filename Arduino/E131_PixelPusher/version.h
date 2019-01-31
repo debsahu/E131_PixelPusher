@@ -1,4 +1,4 @@
-#define SKETCH_VERSION "1.2.0"
+#define SKETCH_VERSION "1.2.1"
 
 /*
 * Dec 13, 2018 v1.0.0
@@ -27,4 +27,9 @@
 * Jan 21, 2019 v1.2.0
 * - Add web interface
 * - user can choose starting universe, unicast/umulticast, total number of universe
+*
+* Jan 31, 2019 v1.2.1
+* - Fix ESP32 specific issues
+* - Use Adafruit's Dotstar SPI method using hardware support
+* - MDNS.setinstance is causing significant FPS drop, commented for now
 */
