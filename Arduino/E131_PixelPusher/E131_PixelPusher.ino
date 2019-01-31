@@ -22,7 +22,6 @@
 #include <ESPAsyncE131.h>        //https://github.com/forkineye/ESPAsyncE131
 #include <ESPAsyncWebServer.h>   //https://github.com/me-no-dev/ESPAsyncWebServer
 #include <ESPAsyncWiFiManager.h> //https://github.com/alanswx/ESPAsyncWiFiManager
-
 #include <EEPROM.h>
 #include "version.h"
 
@@ -31,7 +30,7 @@
 
 #ifdef USE_NEOPIXELS
 #include <NeoPixelBus.h>         //https://github.com/Makuna/NeoPixelBus
-#elseif defined(USE_DOTSTAR)
+#elif defined(USE_DOTSTAR)
 #include <Adafruit_DotStar.h>    //https://github.com/debsahu/Adafruit_DotStar
 #endif
 
