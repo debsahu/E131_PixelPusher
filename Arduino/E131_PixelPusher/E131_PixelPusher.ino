@@ -29,13 +29,13 @@
 // #define USE_DOTSTAR //comment above line to use APA102
 
 #ifdef USE_NEOPIXELS
-#include <NeoPixelBus.h>         //https://github.com/Makuna/NeoPixelBus
+#include <NeoPixelBus.h> //https://github.com/Makuna/NeoPixelBus
 #elif defined(USE_DOTSTAR)
-#include <Adafruit_DotStar.h>    //https://github.com/debsahu/Adafruit_DotStar
+#include <Adafruit_DotStar.h> //https://github.com/debsahu/Adafruit_DotStar
 #endif
 
-#define WIFI_HTM_GZ_PROGMEM  //comment to serve minimized html instead of gziped version
-//#define SERIAL_DEBUG       //uncomment to see if E1.31 data is received
+#define WIFI_HTM_GZ_PROGMEM //comment to serve minimized html instead of gziped version
+// #define SERIAL_DEBUG        //uncomment to see if E1.31 data is received
 //#define SHOW_FPS_SERIAL    //uncomment to see Serial FPS
 
 #define HOSTNAME "E131PixelPusher"
@@ -186,6 +186,8 @@ AsyncWebServer server(HTTP_PORT);
 #define PIN USE_NEOPIXELS //Use any pin under 32
 NeoEsp32BitBangWs2813Method *dma;
 // NeoEsp32RmtWs2813Method *dma;
+uint8_t *pixel = (uint8_t *)malloc(ledCount);
+;
 #endif
 
 #if defined(USE_DOTSTAR) and defined(ESP32)
@@ -197,6 +199,7 @@ Adafruit_DotStar *dma;
 #elif defined(ESP8266)
 #if defined(USE_NEOPIXELS) and defined(ESP8266)
 NeoEsp8266Dma800KbpsMethod *dma; //uses RX/GPIO3 pin
+uint8_t *pixel;
 #endif
 
 #if defined(USE_DOTSTAR) and defined(ESP8266)
@@ -234,19 +237,29 @@ const char update_html[] PROGMEM = "<!DOCTYPE html><html lang=\"en\"><head><titl
 void initDMA(void)
 {
     if (dma)
+    {
         delete dma;
 #if defined(USE_NEOPIXELS) and defined(ESP32)
+        delete pixel;
+    }
     dma = new NeoEsp32BitBangWs2813Method(PIN, ledCount, 3);
     //dma = new NeoEsp32RmtWs2813Method(PIN, ledCount, 3);
     dma->Initialize();
+    pixel = (uint8_t *)malloc(ledCount);
+    memset(pixel, 0, sizeof(pixel));
 #endif
 #if defined(USE_NEOPIXELS) and defined(ESP8266)
-    dma = new NeoEsp8266Dma800KbpsMethod(ledCount, 3);
-    dma->Initialize();
+    delete pixel;
+}
+dma = new NeoEsp8266Dma800KbpsMethod(ledCount, 3);
+dma->Initialize();
+pixel = (uint8_t *)malloc(ledCount);
+memset(pixel, 0, sizeof(pixel));
 #endif
 #ifdef USE_DOTSTAR
-    dma = new Adafruit_DotStar(ledCount, DOTSTAR_BRG);
-    dma->begin();
+}
+dma = new Adafruit_DotStar(ledCount, DOTSTAR_BRG);
+dma->begin();
 #endif
 }
 
@@ -322,12 +335,12 @@ void setup()
     // WiFiManager wifiManager;
     AsyncWiFiManager wifiManager(&server, &dns);
 #else
-    snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
-    snprintf(NameChipId, sizeof(NameChipId), "%s_%06x", HOSTNAME, ESP.getChipId());
+        snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
+        snprintf(NameChipId, sizeof(NameChipId), "%s_%06x", HOSTNAME, ESP.getChipId());
 
-    WiFi.mode(WIFI_STA); // Make sure you're in station mode
-    WiFi.hostname(const_cast<char *>(NameChipId));
-    AsyncWiFiManager wifiManager(&server, &dns); //Local intialization. Once its business is done, there is no need to keep it around
+        WiFi.mode(WIFI_STA); // Make sure you're in station mode
+        WiFi.hostname(const_cast<char *>(NameChipId));
+        AsyncWiFiManager wifiManager(&server, &dns); //Local intialization. Once its business is done, there is no need to keep it around
 #endif
     wifiManager.setConfigPortalTimeout(180); //sets timeout until configuration portal gets turned off, useful to make it all retry or go to sleep in seconds
     if (!wifiManager.autoConnect(NameChipId))
@@ -339,15 +352,13 @@ void setup()
     Serial.print(F(">>> Connected with IP: "));
     Serial.println(WiFi.localIP());
 
-    delay(5000);
-
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
 #ifdef WIFI_HTM_GZ_PROGMEM
         AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", index_htm_gz, index_htm_gz_len);
         response->addHeader("Content-Encoding", "gzip");
         request->send(response);
 #else
-        request->send_P(200, "text/html", index_htm);
+            request->send_P(200, "text/html", index_htm);
 #endif
     });
     server.on("/data", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -430,12 +441,11 @@ void setup()
 
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
     server.begin();
-
-    initE131();
-    delay(1000);
 #if !defined(SHOW_FPS_SERIAL) and !defined(SERIAL_DEBUG)
     Serial.end();
 #endif
+    initE131();
+    delay(1000);
 }
 
 void loop()
@@ -477,19 +487,22 @@ void loop()
         uint16_t len = (170 + multipacketOffset > ledCount) ? (ledCount - multipacketOffset) * 3 : 510;
         //memcpy(pixel + multipacketOffset * 3, data, len); // Burden on source to send in correct color order
         //memcpy(dma->getPixels() + multipacketOffset * 3, data, len);
+#ifdef USE_NEOPIXELS
+        memmove(&pixel[multipacketOffset * 3], data, len);
+#elif defined(USE_DOTSTAR)
         memmove(&dma->getPixels()[multipacketOffset * 3], data, len);
+#endif
     }
-
-    //memcpy(dma->getPixels(), pixel, dma->numPixels());
 
 #ifdef USE_NEOPIXELS
     if (dma->IsReadyToUpdate())
 #endif
     {
 #ifdef USE_NEOPIXELS
+        memcpy(dma->getPixels(), pixel, dma->getPixelsSize());
         dma->Update();
 #elif defined(USE_DOTSTAR)
-        dma->show();
+            dma->show();
 #endif
 #ifdef SHOW_FPS_SERIAL
         frameCt++;
