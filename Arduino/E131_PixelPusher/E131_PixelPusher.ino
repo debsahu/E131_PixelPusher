@@ -184,7 +184,7 @@ AsyncWebServer server(HTTP_PORT);
 #ifdef ESP32
 #if defined(USE_NEOPIXELS) and defined(ESP32)
 #define PIN USE_NEOPIXELS //Use any pin under 32
-NeoEsp32BitBangWs2813Method *dma;
+NeoEsp32I2s1800KbpsMethod *dma;
 // NeoEsp32RmtWs2813Method *dma;
 uint8_t *pixel = (uint8_t *)malloc(ledCount);
 ;
@@ -242,7 +242,7 @@ void initDMA(void)
 #if defined(USE_NEOPIXELS) and defined(ESP32)
         delete pixel;
     }
-    dma = new NeoEsp32BitBangWs2813Method(PIN, ledCount, 3);
+    dma = new NeoEsp32I2s1800KbpsMethod(PIN, ledCount, 3);
     //dma = new NeoEsp32RmtWs2813Method(PIN, ledCount, 3);
     dma->Initialize();
     pixel = (uint8_t *)malloc(ledCount);
