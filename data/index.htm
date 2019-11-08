@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
+    <meta name='viewport' content='width=device-width' />
+    <script>
+        function LoadBody() {
+            //var url = '/data/data.json';
+            var url = '/data';
+            fetch(url, {
+                method: 'GET'
+            }).then(function(e) {
+                if(e.ok){
+                  return e.json();
+                }
+                throw new Error('Network response was not ok.');
+            }).then(function (e) {
+                console.log('Success:', JSON.stringify(e));
+                document.getElementById("pixelct").innerHTML = 170 * (e.uct - e.su + 1);
+                document.getElementById("mode").value = e.mode;
+                document.getElementById("su").value = e.su;
+                document.getElementById("uct").value = e.uct;
+            }).catch(function(e) {
+                console.error('Error:', e)
+            });
+        }
+        function validateVal() {
+            var suval = document.getElementById("su").value;
+            var uctval = document.getElementById("uct").value;
+            var maxUniverse = 170 * 7;
+            if(document.frmmr.mode.value == "unicast") maxUniverse = 170 * 12;
+            if( suval > uctval || (uctval - suval + 1) <= 0 || 170 * (uctval - suval + 1) > maxUniverse) {
+                if(suval > uctval) alert("Starting universe cant be higher than ending universe!");
+                if(uctval - suval + 1 <= 0) alert("Number of Pixels cant be negative/zero!");
+                if(170 * (uctval - suval + 1) > maxUniverse) alert("Cant access that many universes!");
+                return false;
+            } else {
+                return true;
+            }
+        }
+        function calcPixels() {
+            document.getElementById("pixelct").innerHTML = 170 * (document.getElementById("uct").value - document.getElementById("su").value + 1);
+        }
+        function checkUnicast() {
+            if(document.frmmr.mode.value == "unicast") {
+                document.getElementById("su").max = "12";
+                document.getElementById("uct").max = "12";
+            } else {
+                document.getElementById("su").max = "7";
+                document.getElementById("uct").max = "7";
+            }
+        }
+    </script>
+    <style>
+        body {
+            width: 100%;
+            height: 100%;
+            margin: auto;
+            text-align: center;
+            background-color: #c6b3d4;
+            font-family: sans-serif;
+            color: white;
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+
+        #wrapper {
+            width: 250px;
+            height: 270px;
+            border: 2px solid #8531C6;
+            border-radius: 8px;
+            margin: auto;
+            margin-top: 25px;
+            background-color: #580797;
+        }
+
+        .subbt {
+            text-align: center;
+            margin: 20px;
+            background-color: #008CBA;
+            border: none;
+            color: white;
+            padding: 10px 30px;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 20px;
+            border-radius: 8px;
+          }
+
+        .title {
+            line-height: 24px;
+            display: block;
+            padding: 2px 0;
+            color: white;
+        }
+
+        .form {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            box-sizing: border-box;
+        }
+
+        a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .github{
+            margin-top: 10px;
+        }
+
+        .github a {
+            color: #EF5989;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body onload="LoadBody()">
+    <div id="wrapper">
+        <h4 class="title">E1.31 Pixel Pusher</h4>
+        <form name="frmmr" class="form" method='POST' action='/updateparams' onsubmit="return validateVal()">
+            Pixels: <span id="pixelct"></span>
+            <br>
+            Mode: 
+            <select id="mode" name="mode" onblur="checkUnicast()">
+                <option value="unicast">UNICAST</option>
+                <option value="multicast" selected>MULTICAST</option>
+            </select>
+            <br>
+            Start Universe: <input id="su" name="su" type="number" placeholder="Starting universe" max="12" min="1" onkeyup="this.value=this.value.replace(/[^\d]/,'')" onblur="calcPixels()" onclick="calcPixels()"/>
+            <br>
+            End Universe : <input id="uct" name="uct" type="number" placeholder="Ending universe" max="12" min="1" onkeyup="this.value=this.value.replace(/[^\d]/,'')" onblur="calcPixels()" onclick="calcPixels()"/>
+            <br>
+            <input class="subbt" type="submit" value="Update">
+        </form>
+    </div>
+    <br><a href='/update'>Update Firmware?</a>
+    <br>
+    <div class="github"><a href='https://github.com/debsahu/E131_PixelPusher'>E131_PixelPusher by @debsahu</a></div>
+    <script>
+    </script>
+</body>
+
+</html>
