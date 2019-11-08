@@ -500,7 +500,7 @@ void loop()
     {
 #ifdef USE_NEOPIXELS
         memcpy(dma->getPixels(), pixel, dma->getPixelsSize());
-        dma->Update();
+        dma->Update(true);
 #elif defined(USE_DOTSTAR)
             dma->show();
 #endif
