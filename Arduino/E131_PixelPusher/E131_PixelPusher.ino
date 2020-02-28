@@ -181,10 +181,13 @@ static const uint8_t index_htm_gz[] PROGMEM = {
 ESPAsyncE131 *e131;
 AsyncWebServer server(HTTP_PORT);
 
+NeoWs2813Method *dma; // Same as NeoEsp8266Dma800KbpsMethod -- uses RX/GPIO3 pin
+                      // Same as NeoEsp32RmtWs2813Method -- any pin under 32
+
 #ifdef ESP32
 #if defined(USE_NEOPIXELS) and defined(ESP32)
 #define PIN USE_NEOPIXELS //Use any pin under 32
-NeoEsp32I2s1800KbpsMethod *dma;
+// NeoEsp32I2s1800KbpsMethod *dma;
 // NeoEsp32RmtWs2813Method *dma;
 uint8_t *pixel = (uint8_t *)malloc(ledCount);
 ;
@@ -198,7 +201,7 @@ Adafruit_DotStar *dma;
 
 #elif defined(ESP8266)
 #if defined(USE_NEOPIXELS) and defined(ESP8266)
-NeoEsp8266Dma800KbpsMethod *dma; //uses RX/GPIO3 pin
+// NeoEsp8266Dma800KbpsMethod *dma; //uses RX/GPIO3 pin
 uint8_t *pixel;
 #endif
 
@@ -242,7 +245,7 @@ void initDMA(void)
 #if defined(USE_NEOPIXELS) and defined(ESP32)
         delete pixel;
     }
-    dma = new NeoEsp32I2s1800KbpsMethod(PIN, ledCount, 3);
+    dma = new NeoWs2813Method(PIN, ledCount, 3);
     //dma = new NeoEsp32RmtWs2813Method(PIN, ledCount, 3);
     dma->Initialize();
     pixel = (uint8_t *)malloc(ledCount);
@@ -251,7 +254,7 @@ void initDMA(void)
 #if defined(USE_NEOPIXELS) and defined(ESP8266)
     delete pixel;
 }
-dma = new NeoEsp8266Dma800KbpsMethod(ledCount, 3);
+dma = new NeoWs2813Method(ledCount, 3);
 dma->Initialize();
 pixel = (uint8_t *)malloc(ledCount);
 memset(pixel, 0, sizeof(pixel));
@@ -421,6 +424,8 @@ void setup()
                 if(Serial) Update.printError(Serial);
             }
         } });
+
+        delay(10000);
 
     if (MDNS.begin(NameChipId))
     {
