@@ -1,4 +1,4 @@
-#define SKETCH_VERSION "1.2.1"
+#define SKETCH_VERSION "1.2.2"
 
 /*
 * Dec 13, 2018 v1.0.0
@@ -32,4 +32,7 @@
 * - Fix ESP32 specific issues
 * - Use Adafruit's Dotstar SPI method using hardware support
 * - MDNS.setinstance is causing significant FPS drop, commented for now
+*
+* Feb 28, 2020 v1.2.2
+* - Fix ESP32 compiling errors
 */
